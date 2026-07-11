@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Gaming Worlds</title>
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: none; /* Default cursor hide panrom */
+        }
+
+        /* Animated Dark Gradient Background */
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #050505, #1a0b2e, #091833, #220b34, #001122);
+            background-size: 400% 400%;
+            animation: gradientArt 15s ease infinite;
+            color: #ffffff;
+            overflow: hidden;
+            position: relative;
+            touch-action: none; /* Prevent mobile screen scrolling when dragging */
+        }
+
+        @keyframes gradientArt {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Particle Beam Canvas */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Canvas mela click vizhamal irukka */
+        }
+
+        /* Glassmorphism Container */
+        .container {
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 50px 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 
+                        inset 0 0 20px rgba(138, 43, 226, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 10px #b829ff, 0 0 20px #b829ff;
+        }
+
+        /* Neon Buttons (Glitter & Glow Effect) */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .cyber-btn {
+            position: relative;
+            display: inline-block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #0ff; 
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: transparent;
+            border: 2px solid #0ff;
+            border-radius: 5px;
+            transition: 0.3s ease-in-out;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 255, 0.8);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+
+        .cyber-btn:hover::before, .cyber-btn:active::before {
+            left: 0;
+        }
+
+        .cyber-btn:hover, .cyber-btn:active {
+            color: #000;
+            box-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 50px #0ff;
+            transform: scale(1.05);
+        }
+
+        /* Custom Neon Mouse Cursor (The Ball) */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #b829ff;
+            border-radius: 50%;
+            pointer-events: none; /* Click pass through */
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, border-color 0.2s, background-color 0.2s;
+            z-index: 9999;
+            box-shadow: 0 0 10px #b829ff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particle Beam Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Custom Cursor (The Ball) -->
+    <div class="custom-cursor" id="cursor"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Void Portals</h1>
+        
+        <div class="button-group">
+            <a href="https://zoomquilt.org/" target="_blank" class="cyber-btn">Zoomquilt</a>
+            <a href="https://arkadia.xyz/" target="_blank" class="cyber-btn">Arkadia</a>
+            <a href="https://zoomquilt2.com/" target="_blank" class="cyber-btn">Zoomquilt 2</a>
+            <a href="https://infiniteflowers.net/" target="_blank" class="cyber-btn">Infinite Flowers</a>
+        </div>
+    </div>
+
+    <!-- JavaScript Starts Here -->
+    <script>
+        const cursor = document.getElementById('cursor');
+        const buttons = document.querySelectorAll('.cyber-btn');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        const mouse = { x: null, y: null };
+
+        // Resize Canvas dynamically
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Function to update the "Ball" (cursor) position
+        function updateCursor(x, y) {
+            cursor.style.left = x + 'px';
+            cursor.style.top = y + 'px';
+        }
+
+        // Function to create Beam Particles
+        function createParticles(x, y) {
+            for (let i = 0; i < 6; i++) { 
+                particlesArray.push(new Particle(x, y));
+            }
+        }
+
+        // === MOUSE EVENTS (For PC) ===
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+            updateCursor(mouse.x, mouse.y); // Move ball
+            createParticles(mouse.x, mouse.y); // Draw beam
+        });
+
+        // === TOUCH EVENTS (For Mobile Finger Drag) ===
+        window.addEventListener('touchstart', (event) => {
+            mouse.x = event.touches[0].clientX;
+            mouse.y = event.touches[0].clientY;
+            updateCursor(mouse.x, mouse.y); // Snap ball to finger immediately
+            createParticles(mouse.x, mouse.y);
+        });
+
+        window.addEventListener('touchmove', (event) => {
+            mouse.x = event.touches[0].clientX;
+            mouse.y = event.touches[0].clientY;
+            updateCursor(mouse.x, mouse.y); // Follow finger smoothly
+            createParticles(mouse.x, mouse.y);
+        });
+
+        // --- Button Hover Effects ---
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                cursor.style.width = '40px';
+                cursor.style.height = '40px';
+                cursor.style.borderColor = '#0ff'; 
+                cursor.style.backgroundColor = 'rgba(0, 255, 255, 0.2)';
+                cursor.style.boxShadow = '0 0 20px #0ff';
+            });
+
+            button.addEventListener('mouseleave', () => {
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursor.style.borderColor = '#b829ff'; 
+                cursor.style.backgroundColor = 'transparent';
+                cursor.style.boxShadow = '0 0 10px #b829ff';
+            });
+        });
+
+        // --- Particle Animation Logic ---
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 8 + 2; 
+                this.speedX = Math.random() * 6 - 3; 
+                this.speedY = Math.random() * 6 - 3;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`; 
+                this.life = 1.0; 
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 0.03; 
+                if (this.size > 0.2) this.size -= 0.1; 
+            }
+            draw() {
+                ctx.globalAlpha = Math.max(0, this.life); 
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+            }
+        }
+
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                if (particlesArray[i].life <= 0) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            ctx.globalAlpha = 1; 
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
